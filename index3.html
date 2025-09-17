@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMI Calculator</title>
+    <link rel="icon" type="image/x-icon" href="https://placehold.co/64x64/6C5CE7/white?text=EMI">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <script src="https://cdn.anychart.com/releases/8.12.1/js/anychart-bundle.min.js"></script>
+
+    <style>
+        :root {
+            --white: #ffffff;
+            --black: #000000;
+            --primary-purple: #6C5CE7;
+            --light-purple: #A29BFE;
+            --dark-purple: #4B4197;
+            --text-color-dark: #333333;
+            --text-color-light: #555555;
+            --border-color: #e0e0e0;
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --chart-color-violet: #6C5CE7;
+            --chart-color-blue: #4A90E2;
+            --chart-color-peacock: #2CB3B3;
+            --chart-color-dark-violet: #4B4197;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: var(--white);
+            color: var(--text-color-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- Animations & CSS Enhancements --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-purple);
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-purple);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            background-color: var(--dark-purple);
+        }
+
+        .navbar {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: var(--text-color-light);
+            font-weight: 500;
+            transition: color 0.3s ease, transform 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding-bottom: 5px;
+        }
+        
+        .navbar a:hover,
+        .navbar a.active {
+            color: var(--primary-purple);
+            transform: translateY(-2px);
+        }
+
+        .navbar a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-purple);
+            transform: scaleX(1);
+            transition: transform 0.3s ease;
+        }
+
+        .language-dropdown {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .language-button {
+            background-color: var(--primary-purple);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .language-button:hover {
+            background-color: var(--dark-purple);
+            transform: translateY(-2px);
+        }
+
+        .language-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-light);
+            list-style: none;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            display: none;
+            z-index: 10;
+            transform: translateY(10px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .language-dropdown:hover .language-menu {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .language-menu li {
+            padding: 0.5rem 1.5rem;
+            cursor: pointer;
+            color: var(--text-color-dark);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .language-menu li:hover {
+            background-color: var(--light-purple);
+            color: var(--white);
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 70vh;
+            background: linear-gradient(rgba(108, 92, 231, 0.8), rgba(162, 155, 254, 0.8)), url('https://placehold.co/1920x1080/6C5CE7/A29BFE/png?text=Financial+Planning') no-repeat center center/cover;
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            background-attachment: fixed; /* Parallax effect */
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeInTop 1s forwards;
+            animation-delay: 0.2s;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            max-width: 600px;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInTop 1s forwards;
+            animation-delay: 0.4s;
+        }
+
+        .btn-primary {
+            background-color: var(--white);
+            color: var(--primary-purple);
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            animation: fadeInTop 1s forwards;
+            animation-delay: 0.6s;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--light-purple);
+            color: var(--white);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-container {
+            padding: 3rem 5%;
+            min-height: 50vh;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--primary-purple);
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--light-purple);
+            border-radius: 2px;
+            animation: widthIn 1s ease-in-out;
+        }
+
+        @keyframes fadeInTop {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes widthIn {
+            from {
+                width: 0;
+            }
+            to {
+                width: 80px;
+            }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .calculator-card {
+            background-color: var(--white);
+            border-radius: 15px;
+            box-shadow: var(--shadow-light);
+            padding: 2.5rem;
+            max-width: 700px;
+            margin: 0 auto;
+            animation: slideInUp 1s forwards;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color-dark);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--light-purple);
+            box-shadow: 0 0 5px rgba(162, 155, 254, 0.5);
+        }
+        
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: var(--primary-purple);
+        }
+
+        .radio-group-container {
+            margin-top: 1.5rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .radio-group label {
+            padding: 0.75rem 1.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .radio-group input[type="radio"] {
+            display: none;
+        }
+
+        .radio-group input[type="radio"]:checked + label {
+            background-color: var(--light-purple);
+            color: var(--white);
+            border-color: var(--light-purple);
+            box-shadow: 0 2px 8px rgba(162, 155, 254, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .radio-group label:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-purple);
+        }
+
+        .btn-calculate {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-purple);
+            color: var(--white);
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 1.5rem;
+        }
+
+        .btn-calculate:hover {
+            background-color: var(--dark-purple);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.2);
+        }
+
+        .results-container {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px dashed var(--border-color);
+            animation: fadeIn 1s forwards;
+            opacity: 0;
+            animation-delay: 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-line {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        
+        .result-line:hover {
+            transform: translateX(5px);
+        }
+        
+        .result-line strong {
+            color: var(--primary-purple);
+        }
+        
+        .chart-container {
+            width: 100%;
+            max-width: 900px;
+            height: 500px;
+            margin: 2rem auto;
+            border-radius: 15px;
+            box-shadow: var(--shadow-light);
+            background-color: var(--white);
+            padding: 2rem;
+            animation: slideInUp 1s forwards;
+        }
+
+        .chart-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .chart-controls button {
+            background-color: var(--light-purple);
+            color: var(--white);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .chart-controls button:hover,
+        .chart-controls button.active {
+            background-color: var(--primary-purple);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.4);
+        }
+        
+        .faq-accordion .accordion-item {
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+        
+        .faq-accordion .accordion-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .faq-accordion .accordion-button {
+            background-color: var(--white);
+            color: var(--text-color-dark);
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            border: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-accordion .accordion-button:hover {
+            background-color: var(--light-purple);
+            color: var(--white);
+        }
+
+        .faq-accordion .accordion-body {
+            background-color: #f9f9f9;
+            color: var(--text-color-light);
+            border-top: 1px solid var(--border-color);
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            max-height: 0;
+            overflow: hidden;
+            padding: 0 1.5rem;
+        }
+        
+        .faq-accordion .accordion-body.open {
+            max-height: 500px;
+            padding: 1rem 1.5rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        /* Language-specific content visibility */
+        .tamil-content, .english-content {
+            display: none;
+        }
+        .active-lang .english-content {
+            display: block;
+        }
+        .active-lang.lang-ta .english-content {
+            display: none;
+        }
+        .active-lang.lang-ta .tamil-content {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                padding: 1.5rem;
+            }
+            .navbar {
+                flex-direction: column;
+                margin-top: 1rem;
+                align-items: center;
+                gap: 1rem;
+            }
+            .navbar a {
+                padding: 0.5rem 0;
+            }
+            .hero {
+                height: auto;
+                padding: 4rem 2rem;
+            }
+            .section-title {
+                font-size: 2rem;
+            }
+            .calculator-card {
+                padding: 1.5rem;
+            }
+            .chart-container {
+                height: 400px;
+                padding: 1rem;
+            }
+            .chart-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body class="active-lang">
+
+<header class="header">
+    <a href="#" class="logo">
+        <span class="logo-icon">EMI</span>
+        <span class="logo-text">Calculator</span>
+    </a>
+    <nav class="navbar">
+        <a href="#" data-section="calculator-section" class="active" data-en="Calculator" data-ta="கணக்கீடு"><i class="fas fa-calculator"></i><span class="nav-text">Calculator</span></a>
+        <a href="#" data-section="chart-section" data-en="Chart" data-ta="வரைபடம்"><i class="fas fa-chart-pie"></i><span class="nav-text">Chart</span></a>
+        <a href="#" data-section="faq-section" data-en="FAQ" data-ta="அடிக்கடி கேட்கப்படும் கேள்விகள்"><i class="fas fa-question-circle"></i><span class="nav-text">FAQ</span></a>
+        <a href="#" data-section="about-section" data-en="About" data-ta="பற்றி"><i class="fas fa-info-circle"></i><span class="nav-text">About</span></a>
+        <a href="#" data-section="contact-section" data-en="Contact" data-ta="தொடர்பு"><i class="fas fa-envelope"></i><span class="nav-text">Contact</span></a>
+        <div class="language-dropdown">
+            <button class="language-button" data-en="Language" data-ta="மொழி">Language</button>
+            <ul class="language-menu">
+                <li data-lang="en">English</li>
+                <li data-lang="ta">தமிழ்</li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<main class="main-container">
+
+    <section id="hero-section" class="hero">
+        <h1 data-en="Simplify Your Loan Planning" data-ta="உங்கள் கடன் திட்டமிடலை எளிதாக்குங்கள்">
+            <span class="english-content">Simplify Your Loan Planning</span>
+            <span class="tamil-content">உங்கள் கடன் திட்டமிடலை எளிதாக்குங்கள்</span>
+        </h1>
+        <p data-en="Calculate your EMI, analyze payment breakdowns, and plan your finances with our easy-to-use tool." data-ta="உங்கள் EMIஐக் கணக்கிட, கட்டண முறிவுகளை பகுப்பாய்வு செய்ய மற்றும் உங்கள் நிதியை திட்டமிட, எங்கள் எளிதான கருவியைப் பயன்படுத்தவும்.">
+            <span class="english-content">Calculate your EMI, analyze payment breakdowns, and plan your finances with our easy-to-use tool.</span>
+            <span class="tamil-content">உங்கள் EMIஐக் கணக்கிட, கட்டண முறிவுகளை பகுப்பாய்வு செய்ய மற்றும் உங்கள் நிதியை திட்டமிட, எங்கள் எளிதான கருவியைப் பயன்படுத்தவும்.</span>
+        </p>
+        <a href="#calculator-section" class="btn-primary" data-en="Get Started" data-ta="தொடங்கவும்">
+            <span class="english-content">Get Started</span>
+            <span class="tamil-content">தொடங்கவும்</span>
+        </a>
+    </section>
+
+    <section id="calculator-section" class="content-section">
+        <h2 class="section-title" data-en="EMI Calculator" data-ta="EMI கணக்கீடு">
+            <span class="english-content">EMI Calculator</span>
+            <span class="tamil-content">EMI கணக்கீடு</span>
+        </h2>
+        <div class="calculator-card">
+            <form id="emi-form">
+                <div class="form-group">
+                    <label for="Principal" data-en="Principal Amount (₹)" data-ta="அசல் தொகை (₹)">
+                        <span class="english-content">Principal Amount (₹)</span>
+                        <span class="tamil-content">அசல் தொகை (₹)</span>
+                    </label>
+                    <input type="number" id="Principal" placeholder="e.g., 500000" required>
+                </div>
+                <div class="form-group">
+                    <label for="paymentInAdvance" data-en="Advance Payment (₹)" data-ta="முன் பணம் (₹)">
+                        <span class="english-content">Advance Payment (₹)</span>
+                        <span class="tamil-content">முன் பணம் (₹)</span>
+                    </label>
+                    <input type="number" id="paymentInAdvance" placeholder="e.g., 50000" required>
+                </div>
+                <div class="form-group">
+                    <label for="InterestRate" data-en="Interest Rate (%) - Annual" data-ta="வட்டி விகிதம் (%) - ஆண்டுக்கு">
+                        <span class="english-content">Interest Rate (%) - Annual</span>
+                        <span class="tamil-content">வட்டி விகிதம் (%) - ஆண்டுக்கு</span>
+                    </label>
+                    <input type="number" id="InterestRate" placeholder="e.g., 8.5" required>
+                </div>
+                <div class="form-group">
+                    <label for="month" data-en="Loan Tenure (Months)" data-ta="கடன் காலம் (மாதங்கள்)">
+                        <span class="english-content">Loan Tenure (Months)</span>
+                        <span class="tamil-content">கடன் காலம் (மாதங்கள்)</span>
+                    </label>
+                    <input type="number" id="month" placeholder="e.g., 60" required>
+                </div>
+                <div class="form-group">
+                    <label for="currentYear" data-en="Start Year" data-ta="தொடங்கும் ஆண்டு">
+                        <span class="english-content">Start Year</span>
+                        <span class="tamil-content">தொடங்கும் ஆண்டு</span>
+                    </label>
+                    <input type="number" id="currentYear" value="2025" required>
+                </div>
+                <div class="form-group">
+                    <label for="currentMonth" data-en="Start Month" data-ta="தொடங்கும் மாதம்">
+                        <span class="english-content">Start Month</span>
+                        <span class="tamil-content">தொடங்கும் மாதம்</span>
+                    </label>
+                    <select id="currentMonth" required>
+                        <option value="0" data-en="January" data-ta="ஜனவரி"><span class="english-content">January</span><span class="tamil-content">ஜனவரி</span></option>
+                        <option value="1" data-en="February" data-ta="பிப்ரவரி"><span class="english-content">February</span><span class="tamil-content">பிப்ரவரி</span></option>
+                        <option value="2" data-en="March" data-ta="மார்ச்"><span class="english-content">March</span><span class="tamil-content">மார்ச்</span></option>
+                        <option value="3" data-en="April" data-ta="ஏப்ரல்"><span class="english-content">April</span><span class="tamil-content">ஏப்ரல்</span></option>
+                        <option value="4" data-en="May" data-ta="மே"><span class="english-content">May</span><span class="tamil-content">மே</span></option>
+                        <option value="5" data-en="June" data-ta="ஜூன்"><span class="english-content">June</span><span class="tamil-content">ஜூன்</span></option>
+                        <option value="6" data-en="July" data-ta="ஜூலை"><span class="english-content">July</span><span class="tamil-content">ஜூலை</span></option>
+                        <option value="7" data-en="August" data-ta="ஆகஸ்ட்"><span class="english-content">August</span><span class="tamil-content">ஆகஸ்ட்</span></option>
+                        <option value="8" data-en="September" data-ta="செப்டம்பர்"><span class="english-content">September</span><span class="tamil-content">செப்டம்பர்</span></option>
+                        <option value="9" data-en="October" data-ta="அக்டோபர்"><span class="english-content">October</span><span class="tamil-content">அக்டோபர்</span></option>
+                        <option value="10" data-en="November" data-ta="நவம்பர்"><span class="english-content">November</span><span class="tamil-content">நவம்பர்</span></option>
+                        <option value="11" data-en="December" data-ta="டிசம்பர்"><span class="english-content">December</span><span class="tamil-content">டிசம்பர்</span></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tax" data-en="Annual Tax (%)" data-ta="ஆண்டு வரி (%)">
+                        <span class="english-content">Annual Tax (%)</span>
+                        <span class="tamil-content">ஆண்டு வரி (%)</span>
+                    </label>
+                    <input type="number" id="tax" placeholder="e.g., 1" required>
+                </div>
+                <div class="radio-group-container">
+                    <label data-en="Home Loan" data-ta="வீட்டு கடன்">
+                        <span class="english-content">Home Loan</span>
+                        <span class="tamil-content">வீட்டு கடன்</span>
+                    </label>
+                    <div class="radio-group">
+                        <input type="radio" id="radio1" name="optradio1" value="yes" checked>
+                        <label for="radio1" data-en="Yes" data-ta="ஆம்">
+                            <span class="english-content">Yes</span>
+                            <span class="tamil-content">ஆம்</span>
+                        </label>
+                        <input type="radio" id="radio2" name="optradio1" value="no">
+                        <label for="radio2" data-en="No" data-ta="இல்லை">
+                            <span class="english-content">No</span>
+                            <span class="tamil-content">இல்லை</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="radio-group-container">
+                    <label data-en="Home Loan & Tax Approval" data-ta="வீட்டுக் கடன் மற்றும் வரி ஒப்புதல்">
+                        <span class="english-content">Home Loan & Tax Approval</span>
+                        <span class="tamil-content">வீட்டுக் கடன் மற்றும் வரி ஒப்புதல்</span>
+                    </label>
+                    <div class="radio-group">
+                        <input type="radio" id="radio3" name="optradio2" value="yes" checked>
+                        <label for="radio3" data-en="Yes" data-ta="ஆம்">
+                            <span class="english-content">Yes</span>
+                            <span class="tamil-content">ஆம்</span>
+                        </label>
+                        <input type="radio" id="radio4" name="optradio2" value="no">
+                        <label for="radio4" data-en="No" data-ta="இல்லை">
+                            <span class="english-content">No</span>
+                            <span class="tamil-content">இல்லை</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-calculate" id="calBtn" data-en="Calculate" data-ta="கணக்கீடு">
+                    <span class="english-content">Calculate</span>
+                    <span class="tamil-content">கணக்கீடு</span>
+                </button>
+            </form>
+
+            <div id="results-section" class="results-container hidden">
+                <h3 class="section-subtitle" data-en="Calculation Summary" data-ta="கணக்கீடு சுருக்கம்">
+                    <span class="english-content">Calculation Summary</span>
+                    <span class="tamil-content">கணக்கீடு சுருக்கம்</span>
+                </h3>
+                <p class="result-line" id="loanAmount"><span class="english-content">Loan Amount:</span><span class="tamil-content">கடன் தொகை:</span></p>
+                <p class="result-line" id="advance"><span class="english-content">Advance Payment:</span><span class="tamil-content">முன் பணம்:</span></p>
+                <p class="result-line" id="monthlyEmi"><span class="english-content">Monthly EMI:</span><span class="tamil-content">மாதாந்திர EMI:</span></p>
+                <p class="result-line" id="taxid"><span class="english-content">Monthly Tax:</span><span class="tamil-content">மாத வரி:</span></p>
+                <p class="result-line" id="totalTax"><span class="english-content">Total Tax:</span><span class="tamil-content">மொத்த வரி:</span></p>
+                <p class="result-line" id="totalofemi"><span class="english-content">Total Installments:</span><span class="tamil-content">மொத்த தவணைகள்:</span></p>
+                <p class="result-line" id="totalInterest"><span class="english-content">Total Interest Payable:</span><span class="tamil-content">செலுத்த வேண்டிய மொத்த வட்டி:</span></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="chart-section" class="content-section hidden">
+        <h2 class="section-title" data-en="Loan Breakdown Charts" data-ta="கடன் முறிவு விளக்கப்படங்கள்">
+            <span class="english-content">Loan Breakdown Charts</span>
+            <span class="tamil-content">கடன் முறிவு விளக்கப்படங்கள்</span>
+        </h2>
+        <div class="chart-controls">
+            <button class="chart-type active" data-chart-type="amortization" data-en="Amortization Chart" data-ta="தவணைமுறை விளக்கப்படம்">
+                <span class="english-content">Amortization Chart</span>
+                <span class="tamil-content">தவணைமுறை விளக்கப்படம்</span>
+            </button>
+            <button class="chart-type" data-chart-type="pie" data-en="Pie Chart" data-ta="பை விளக்கப்படம்">
+                <span class="english-content">Pie Chart</span>
+                <span class="tamil-content">பை விளக்கப்படம்</span>
+            </button>
+            <button class="chart-type" data-chart-type="line" data-en="Line Chart" data-ta="கோட்டு விளக்கப்படம்">
+                <span class="english-content">Line Chart</span>
+                <span class="tamil-content">கோட்டு விளக்கப்படம்</span>
+            </button>
+        </div>
+        <div class="chart-container" id="chart-container"></div>
+    </section>
+
+    <section id="faq-section" class="content-section hidden">
+        <h2 class="section-title" data-en="Frequently Asked Questions" data-ta="அடிக்கடி கேட்கப்படும் கேள்விகள்">
+            <span class="english-content">Frequently Asked Questions</span>
+            <span class="tamil-content">அடிக்கடி கேட்கப்படும் கேள்விகள்</span>
+        </h2>
+        <div class="faq-accordion">
+            <div class="accordion-item">
+                <button class="accordion-button">
+                    <span class="english-content">What is an EMI calculator?</span>
+                    <span class="tamil-content">EMI கால்குலேட்டர் என்பது என்ன?</span>
+                </button>
+                <div class="accordion-body">
+                    <p class="english-content">An EMI (Equated Monthly Installment) calculator is a tool that helps you determine the fixed monthly payment required to repay a loan over a specific period. It is composed of both the principal amount and the interest on the loan.</p>
+                    <p class="tamil-content">EMI (சமமான மாத தவணை) கால்குலேட்டர் என்பது குறிப்பிட்ட காலகட்டத்தில் கடனை திருப்பி செலுத்த தேவையான நிலையான மாத தவணையை (EMI) கணக்கிட பயன்படுத்தப்படும் கருவியாகும். EMI யில் தலைமைத் தொகையும் கடனின் வட்டியையும் உள்ளடக்கியது.</p>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <button class="accordion-button">
+                    <span class="english-content">How does an EMI calculator work?</span>
+                    <span class="tamil-content">EMI கால்குலேட்டர் எவ்வாறு செயல்படுகிறது?</span>
+                </button>
+                <div class="accordion-body">
+                    <p class="english-content">It uses a mathematical formula (EMI = [P x R x (1+R)^N]/[(1+R)^N-1]) to compute the monthly payment. You provide the loan amount (P), interest rate (R), and tenure (N), and the calculator gives you the EMI amount.</p>
+                    <p class="tamil-content">இது ஒரு கணித சூத்திரத்தைப் பயன்படுத்தி (EMI = [P x R x (1+R)^N]/[(1+R)^N-1]) மாதாந்திர கட்டணத்தைக் கணக்கிடுகிறது. நீங்கள் கடன் தொகை (P), வட்டி விகிதம் (R) மற்றும் காலம் (N) ஆகியவற்றை வழங்கினால், கால்குலேட்டர் உங்களுக்கு EMI தொகையை வழங்குகிறது.</p>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <button class="accordion-button">
+                    <span class="english-content">What are the benefits of using an EMI calculator?</span>
+                    <span class="tamil-content">EMI கால்குலேட்டரைப் பயன்படுத்துவதால் என்ன பயன்கள்?</span>
+                </button>
+                <div class="accordion-body">
+                    <p class="english-content">It provides quick and accurate calculations, helps in financial planning, allows you to compare different loan options, and shows you how much of your payment goes towards principal and interest over time.</p>
+                    <p class="tamil-content">இது விரைவான மற்றும் துல்லியமான கணக்கீடுகளை வழங்குகிறது, நிதி திட்டமிடலுக்கு உதவுகிறது, வெவ்வேறு கடன் விருப்பங்களை ஒப்பிட அனுமதிக்கிறது, மேலும் உங்கள் கட்டணத்தில் எவ்வளவு அசல் மற்றும் வட்டிக்குச் செல்கிறது என்பதைக் காட்டுகிறது.</p>
+                </div>
+            </div>
+               <div class="accordion-item">
+                <button class="accordion-button">
+                        <span class="english-content">Uses of an EMI Calculator?</span>
+                        <span class="tamil-content">EMI கணக்கீட்டின் பயன்கள்?</span>
+                </button>
+                <div class="accordion-body">
+                        <p class="english-content">1. Loan Planning:<br>
+                            It helps borrowers plan their finances by giving them a clear understanding of the monthly installment they need to pay if they take out a loan.<br><br>
+                            2. Comparison of Loan Offers:<br>
+                            Borrowers can compare different loan offers from various lenders by calculating the EMI for each offer. This allows them to choose the most affordable option.<br><br>
+                            3. Determining Loan Affordability:<br>
+                            By calculating the EMI, borrowers can determine whether they can afford the loan given their current income and expenses.<br><br>
+                        4. Adjusting Loan Parameters:<br>
+                        Borrowers can experiment with different loan amounts, interest rates, and tenures to see how these factors affect their EMI. This can help in deciding on a loan that best fits their financial situation<br><br>
+                        5.Financial Planning: <br>
+                        Helps in planning long-term financial goals by understanding how much of their monthly income will be tied up in loan repayments.
+                    </p>
+                    <p class="tamil-content">1. கடன் திட்டமிடல்:<br>
+                        கடன் வாங்குபவர்கள் கடனை வாங்கினால் அவர்கள் செலுத்த வேண்டிய மாதாந்திர தவணை பற்றிய தெளிவான புரிதலை வழங்குவதன் மூலம் அவர்களின் நிதியைத் திட்டமிட உதவுகிறது.<br><br>
+                    2. கடன் சலுகைகளின் ஒப்பீடு:<br>
+                    ஒவ்வொரு சலுகைக்கும் EMI கணக்கிடுவதன் மூலம் கடன் வாங்குபவர்கள் பல்வேறு கடன் வழங்குபவர்களிடமிருந்து வெவ்வேறு கடன் சலுகைகளை ஒப்பிடலாம். இது மிகவும் மலிவான விருப்பத்தைத் தேர்வுசெய்ய அனுமதிக்கிறது.<br><br>
+                    3. கடன் வாங்கக்கூடிய தன்மையை தீர்மானித்தல்:<br>
+                    EMIஐக் கணக்கிடுவதன் மூலம், கடன் வாங்குபவர்கள் தங்களின் தற்போதைய வருமானம் மற்றும் செலவுகளைக் கொண்டு கடனைத் தாங்க முடியுமா என்பதைத் தீர்மானிக்க முடியும்.<br><br>
+                    4. கடன் அளவுருக்களை சரிசெய்தல்:<br>
+                    கடன் வாங்குபவர்கள் வெவ்வேறு கடன் தொகைகள், வட்டி விகிதங்கள் மற்றும் தவணைக்காலம் ஆகியவற்றைப் பரிசோதித்து, இந்தக் காரணிகள் தங்கள் EMIஐ எவ்வாறு பாதிக்கிறது என்பதைப் பார்க்கலாம். இது அவர்களின் நிதி நிலைமைக்கு ஏற்ற கடனைத் தீர்மானிக்க உதவும்<br><br>
+                    5.நிதி திட்டமிடல்: <br>
+                    அவர்களின் மாத வருமானத்தில் எவ்வளவு கடன் திருப்பிச் செலுத்தப்படும் என்பதைப் புரிந்துகொள்வதன் மூலம் நீண்ட கால நிதி இலக்குகளைத் திட்டமிட உதவுகிறது.</p>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <button class="accordion-button">
+                    <span class="english-content">Is the EMI calculated by this tool final?</span>
+                    <span class="tamil-content">இந்தக் கருவியால் கணக்கிடப்பட்ட EMI இறுதியானதா?</span>
+                </button>
+                <div class="accordion-body">
+                    <p class="english-content">No, the EMI calculated is an estimate. The actual EMI may vary slightly depending on the specific terms and conditions of your bank or financial institution, including factors like processing fees and other charges.</p>
+                    <p class="tamil-content">இல்லை, கணக்கிடப்பட்ட EMI ஒரு மதிப்பிடப்பட்ட தொகை மட்டுமே. செயலாக்க கட்டணங்கள் மற்றும் பிற கட்டணங்கள் உட்பட உங்கள் வங்கி அல்லது நிதி நிறுவனத்தின் குறிப்பிட்ட விதிமுறைகள் மற்றும் நிபந்தனைகளைப் பொறுத்து உண்மையான EMI சற்று மாறுபடலாம்.</p>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <button class="accordion-button">
+                    <span class="english-content">What are the different charts shown?</span>
+                    <span class="tamil-content">காட்டப்படும் வெவ்வேறு விளக்கப்படங்கள் யாவை?</span>
+                </button>
+                <div class="accordion-body">
+                    <p class="english-content">The charts visualize your loan repayment plan. The pie chart shows the breakdown of your total payments into principal, interest, and tax. The amortization chart and line chart show how the principal, interest, and tax payments change month by month over the loan tenure.</p>
+                    <p class="tamil-content">விளக்கப்படங்கள் உங்கள் கடன் திருப்பிச் செலுத்தும் திட்டத்தை காட்சிப்படுத்துகின்றன. பை விளக்கப்படம் உங்கள் மொத்த கட்டணங்களை அசல், வட்டி மற்றும் வரி எனப் பிரித்துக் காட்டுகிறது. தவணைமுறை விளக்கப்படம் மற்றும் கோட்டு விளக்கப்படம் கடன் காலத்தில் அசல், வட்டி மற்றும் வரி கட்டணங்கள் எவ்வாறு மாதம் தோறும் மாறுகின்றன என்பதைக் காட்டுகின்றன.</p>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <button class="accordion-button">
+                    <span class="english-content">Can I calculate EMI for a home loan with tax benefits?</span>
+                    <span class="tamil-content">வரிச் சலுகைகளுடன் வீட்டுக்கடனுக்கான EMIஐ நான் கணக்கிடலாமா?</span>
+                </button>
+                <div class="accordion-body">
+                    <p class="english-content">Yes, this calculator has options for home loan and tax approval. You can include your annual tax percentage to see how it affects your total monthly payment and overall loan cost, providing a more comprehensive calculation.</p>
+                    <p class="tamil-content">ஆம், இந்த கால்குலேட்டரில் வீட்டுக் கடன் மற்றும் வரி ஒப்புதலுக்கான விருப்பங்கள் உள்ளன. உங்கள் ஆண்டு வரி சதவீதத்தைச் சேர்த்து, அது உங்கள் மொத்த மாதாந்திர கட்டணம் மற்றும் ஒட்டுமொத்த கடன் செலவை எவ்வாறு பாதிக்கிறது என்பதைப் பார்க்கலாம், இது ஒரு விரிவான கணக்கீட்டை வழங்குகிறது.</p>
+                </div>
+            </div>
+                <div class="accordion-item">
+                <button class="accordion-button">
+                    <span class="english-content"> What Components Are Shown in the Graph?</span>
+                    <span class="tamil-content">வரைபடத்தில் என்ன கூறுகள் காட்டப்படுகின்றன?</span>
+                </button>
+                <div class="accordion-body">
+                    <p class="english-content"><b>1. Principal Payment:</b> The portion of the EMI that goes towards repaying the loan principal.<br>
+                        <b>2. Interest Payment:</b>  The portion of the EMI that covers the interest on the remaining loan balance.<br>
+                        <b>3. Remaining Balance:</b>  The outstanding loan balance after each payment.<br>
+                         <b>4. Tax Amount:</b>Any fixed monthly tax or additional fee.</p>
+
+                        <p class="tamil-content">
+                            1. முதன்மைப் பணம்:</b> கடன் அசலைத் திருப்பிச் செலுத்தும் EMIயின் பகுதி.<br>
+                        <b>2. வட்டி செலுத்துதல்:</b> மீதமுள்ள கடன் நிலுவைத் தொகையின் வட்டியை உள்ளடக்கிய EMI இன் பகுதி.<br>
+                        <b>3. மீதி இருப்பு:</b> ஒவ்வொரு கட்டணத்திற்குப் பிறகும் நிலுவையில் உள்ள கடன் பாக்கி.<br>
+                         <b>4. வரித் தொகை:</b>ஏதேனும் நிலையான மாதாந்திர வரி அல்லது கூடுதல் கட்டணம்
+                        </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about-section" class="content-section hidden">
+        <h2 class="section-title" data-en="About Us" data-ta="எங்களை பற்றி">
+            <span class="english-content">About Us</span>
+            <span class="tamil-content">எங்களை பற்றி</span>
+        </h2>
+        <p class="section-subtitle" data-en="We believe in making financial planning simple and accessible for everyone." data-ta="நிதி திட்டமிடலை அனைவருக்கும் எளிமையாகவும் அணுகக்கூடியதாகவும் மாற்றுவதில் நாங்கள் நம்புகிறோம்.">
+            <span class="english-content">We believe in making financial planning simple and accessible for everyone.</span>
+            <span class="tamil-content">நிதி திட்டமிடலை அனைவருக்கும் எளிமையாகவும் அணுகக்கூடியதாகவும் மாற்றுவதில் நாங்கள் நம்புகிறோம்.</span>
+        </p>
+        <div class="calculator-card">
+            <p class="english-content">Our mission is to provide a user-friendly and accurate EMI calculation tool that helps you make informed financial decisions. Whether you are planning for a home loan, car loan, or personal loan, our calculator gives you a clear and instant overview of your repayment schedule.</p>
+            <p class="tamil-content">தகவலறிந்த நிதி முடிவுகளை எடுக்க உதவும் ஒரு பயனர் நட்பு மற்றும் துல்லியமான EMI கணக்கீட்டு கருவியை வழங்குவதே எங்கள் நோக்கம். நீங்கள் வீட்டுக் கடன், கார் கடன் அல்லது தனிநபர் கடனுக்குத் திட்டமிடுகிறீர்களோ, எங்கள் கால்குலேட்டர் உங்கள் திருப்பிச் செலுத்தும் அட்டவணையின் தெளிவான மற்றும் உடனடி மேலோட்டத்தை வழங்குகிறது.</p>
+        </div>
+    </section>
+
+    <section id="contact-section" class="content-section hidden">
+        <h2 class="section-title" data-en="Get in Touch" data-ta="தொடர்பு கொள்ளவும்">
+            <span class="english-content">Get in Touch</span>
+            <span class="tamil-content">தொடர்பு கொள்ளவும்</span>
+        </h2>
+        <p class="section-subtitle" data-en="We're here to help with any questions you may have." data-ta="உங்களுக்கு ஏதேனும் கேள்விகள் இருந்தால் நாங்கள் உதவ இங்கே இருக்கிறோம்.">
+            <span class="english-content">We're here to help with any questions you may have.</span>
+            <span class="tamil-content">உங்களுக்கு ஏதேனும் கேள்விகள் இருந்தால் நாங்கள் உதவ இங்கே இருக்கிறோம்.</span>
+        </p>
+        <div class="calculator-card">
+            <p><i class="fas fa-envelope"></i> <span class="english-content">Email:</span><span class="tamil-content">மின்னஞ்சல்:</span> logioffical@gmail.com</p>
+            <p><i class="fas fa-phone"></i> <span class="english-content">Phone:</span><span class="tamil-content">தொலைபேசி:</span> +91 8428396196</p>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const navLinks = document.querySelectorAll('.navbar a');
+        const sections = document.querySelectorAll('.content-section');
+        const heroSection = document.getElementById('hero-section');
+        const calculateBtn = document.getElementById('calBtn');
+        const resultsSection = document.getElementById('results-section');
+        const chartControls = document.querySelectorAll('.chart-type');
+        const heroBtn = document.querySelector('.hero .btn-primary');
+        const faqButtons = document.querySelectorAll('.accordion-button');
+        const langButtons = document.querySelectorAll('.language-menu li');
+        const langButtonMain = document.querySelector('.language-button');
+        
+        let chartData = null;
+        let currentLang = 'en';
+
+        const monthNames = {
+            en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            ta: ['ஜனவரி', 'பிப்ரவரி', 'மார்ச்', 'ஏப்ரல்', 'மே', 'ஜூன்', 'ஜூலை', 'ஆகஸ்ட்', 'செப்டம்பர்', 'அக்டோபர்', 'நவம்பர்', 'டிசம்பர்']
+        };
+
+        const resultTexts = {
+            en: {
+                loan: "Loan Amount: ",
+                advance: "Advance Payment: ",
+                monthlyEmi: "Monthly EMI: ",
+                monthlyTax: "Monthly Tax: ",
+                totalTax: "Total Tax: ",
+                totalInstallments: "Total Amount Payable: ",
+                totalInterest: "Total Interest Payable: "
+            },
+            ta: {
+                loan: "கடன் தொகை: ",
+                advance: "முன் பணம்: ",
+                monthlyEmi: "மாதாந்திர EMI: ",
+                monthlyTax: "மாத வரி: ",
+                totalTax: "மொத்த வரி: ",
+                totalInstallments: "மொத்த தவணைகள்: ",
+                totalInterest: "செலுத்த வேண்டிய மொத்த வட்டி: "
+            }
+        };
+
+        const chartTitles = {
+            en: {
+                amortization: 'EMI Amortization Chart',
+                pie: 'Total Payments Breakdown',
+                line: 'Monthly Breakdown'
+            },
+            ta: {
+                amortization: 'EMI தவணைமுறை விளக்கப்படம்',
+                pie: 'மொத்த கட்டணங்களின் பிரிவு',
+                line: 'மாதாந்திர பிரிப்பு'
+            }
+        };
+        const seriesNames = {
+            en: { principal: 'Principal', interest: 'Interest', tax: 'Tax', month: 'Month', payments: 'Payments', balance: 'Balance Remaining' },
+            ta: { principal: 'அசல்', interest: 'வட்டி', tax: 'வரி', month: 'மாதம்', payments: 'கட்டணங்கள்', balance: 'மீதி இருப்பு' }
+        };
+
+        const chartColors = [
+            '#6C5CE7', // Violet
+            '#4A90E2', // Blue
+            '#2CB3B3', // Peacock Blue
+            '#4B4197', // Dark Violet
+        ];
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.body.classList.remove('lang-en', 'lang-ta');
+            document.body.classList.add(`lang-${lang}`);
+            
+            document.querySelectorAll('[data-en]').forEach(el => {
+                const text = el.getAttribute(`data-${lang}`);
+                if (text) {
+                    if (el.tagName === 'BUTTON' || el.tagName === 'A') {
+                        const navTextSpan = el.querySelector('.nav-text');
+                        if (navTextSpan) {
+                            navTextSpan.textContent = text;
+                        } else {
+                            el.textContent = text;
+                        }
+                    } else {
+                        const englishContent = el.querySelector('.english-content');
+                        const tamilContent = el.querySelector('.tamil-content');
+                        if (englishContent && tamilContent) {
+                            // Handled by CSS
+                        } else {
+                            el.textContent = text;
+                        }
+                    }
+                }
+            });
+            
+            if (chartData) {
+                const texts = resultTexts[currentLang];
+                document.getElementById("loanAmount").innerHTML = `<span class="${currentLang}-content">${texts.loan}</span> <strong>₹${chartData.loanAmount.toFixed(2)}</strong>`;
+                document.getElementById("advance").innerHTML = `<span class="${currentLang}-content">${texts.advance}</span> <strong>₹${chartData.paymentInAdvance.toFixed(2)}</strong>`;
+                document.getElementById("monthlyEmi").innerHTML = `<span class="${currentLang}-content">${texts.monthlyEmi}</span> <strong>₹${chartData.emi.toFixed(2)}</strong>`;
+                document.getElementById("taxid").innerHTML = `<span class="${currentLang}-content">${texts.monthlyTax}</span> <strong>₹${chartData.taxMonthly.toFixed(2)}</strong>`;
+                document.getElementById("totalTax").innerHTML = `<span class="${currentLang}-content">${texts.totalTax}</span> <strong>₹${chartData.totalTax.toFixed(2)}</strong>`;
+                document.getElementById("totalofemi").innerHTML = `<span class="${currentLang}-content">${texts.totalInstallments}</span> <strong>₹${chartData.totalPayable.toFixed(2)}</strong>`;
+                document.getElementById("totalInterest").innerHTML = `<span class="${currentLang}-content">${texts.totalInterest}</span> <strong>₹${chartData.totalInterest.toFixed(2)}</strong>`;
+            }
+
+            if (!document.getElementById('chart-section').classList.contains('hidden') && chartData) {
+                const activeChartType = document.querySelector('.chart-type.active').dataset.chartType;
+                if (activeChartType === 'pie') {
+                    drawPieChart(chartData);
+                } else if (activeChartType === 'amortization') {
+                    drawAmortizationChart(chartData);
+                } else if (activeChartType === 'line') {
+                    drawLineChart(chartData);
+                }
+            }
+        }
+        
+        setLanguage('en');
+
+        langButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const lang = button.getAttribute('data-lang');
+                setLanguage(lang);
+                langButtonMain.textContent = button.textContent;
+            });
+        });
+
+        // Add scroll effect to header
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        function showSection(sectionId) {
+            heroSection.classList.add('hidden');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.section === sectionId) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        if (heroBtn) {
+            heroBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection('calculator-section');
+                document.getElementById('calculator-section').scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sectionId = this.dataset.section;
+                if (sectionId === 'chart-section' && !chartData) {
+                    alert(currentLang === 'ta' ? 'விளக்கப்படத்தைப் பார்க்க முதலில் EMIஐக் கணக்கிடுங்கள்!' : 'Please calculate the EMI first to see the chart!');
+                    showSection('calculator-section');
+                    return;
+                }
+                showSection(sectionId);
+                document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        faqButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const body = this.nextElementSibling;
+                const isOpen = body.classList.contains('open');
+                
+                // Close all others
+                document.querySelectorAll('.accordion-body').forEach(b => b.classList.remove('open'));
+                
+                // Open the clicked one if it was closed
+                if (!isOpen) {
+                    body.classList.add('open');
+                }
+            });
+        });
+
+        calculateBtn.addEventListener("click", function(event) {
+            event.preventDefault();
+            const principal = parseFloat(document.getElementById("Principal").value);
+            const paymentInAdvance = parseFloat(document.getElementById("paymentInAdvance").value);
+            const interestRate = parseFloat(document.getElementById("InterestRate").value);
+            const months = parseInt(document.getElementById("month").value);
+            const tax = parseFloat(document.getElementById("tax").value);
+            const currentYear = parseInt(document.getElementById("currentYear").value);
+            const currentMonth = parseInt(document.getElementById("currentMonth").value);
+
+            if (isNaN(principal) || isNaN(interestRate) || isNaN(months) || isNaN(paymentInAdvance) || isNaN(tax) || principal <= 0 || interestRate < 0 || months <= 0) {
+                alert(currentLang === 'ta' ? 'அனைத்து புலங்களிலும் சரியான எண்களை உள்ளிடவும்.' : 'Please enter valid numbers for all fields.');
+                return;
+            }
+
+            const loanAmount = principal - paymentInAdvance;
+            const monthlyInterestRate = interestRate / 12 / 100;
+            const taxMonthly = tax / 12 / 100 * loanAmount;
+            
+            const emi = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months)) /
+                        (Math.pow(1 + monthlyInterestRate, months) - 1);
+            
+            const totalInterest = (emi * months) - loanAmount;
+            const totalTax = taxMonthly * months;
+            const totalPayable = (emi * months) + totalTax;
+
+            const amortizationData = [];
+            let remainingPrincipal = loanAmount;
+            let currentMonthIndex = currentMonth;
+            let currentYearVal = currentYear;
+
+            for (let i = 1; i <= months; i++) {
+                const interestForMonth = remainingPrincipal * monthlyInterestRate;
+                const principalForMonth = emi - interestForMonth;
+                const balanceRemaining = Math.max(0, remainingPrincipal - principalForMonth);
+                
+                amortizationData.push({
+                    x: `${monthNames[currentLang][currentMonthIndex]} ${currentYearVal}`,
+                    principal: principalForMonth,
+                    interest: interestForMonth,
+                    tax: taxMonthly,
+                    balance: balanceRemaining
+                });
+                
+                remainingPrincipal -= principalForMonth;
+                currentMonthIndex++;
+                if (currentMonthIndex === 12) {
+                    currentMonthIndex = 0;
+                    currentYearVal++;
+                }
+            }
+
+            chartData = {
+                principal: principal,
+                paymentInAdvance: paymentInAdvance,
+                loanAmount: loanAmount,
+                totalInterest: totalInterest,
+                totalTax: totalTax,
+                emi: emi,
+                months: months,
+                taxMonthly: taxMonthly,
+                totalPayable: totalPayable,
+                amortizationData: amortizationData
+            };
+
+            setLanguage(currentLang);
+            
+            resultsSection.classList.remove('hidden');
+            
+            showSection('chart-section');
+            drawAmortizationChart(chartData);
+            chartControls.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('[data-chart-type="amortization"]').classList.add('active');
+        });
+
+        chartControls.forEach(button => {
+            button.addEventListener('click', function() {
+                if (!chartData) {
+                    alert(currentLang === 'ta' ? 'விளக்கப்படத்தைப் பார்க்க முதலில் EMIஐக் கணக்கிடுங்கள்!' : 'Please calculate the EMI first.');
+                    return;
+                }
+                chartControls.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                const chartType = this.dataset.chartType;
+                if (chartType === 'pie') {
+                    drawPieChart(chartData);
+                } else if (chartType === 'amortization') {
+                    drawAmortizationChart(chartData);
+                } else if (chartType === 'line') {
+                    drawLineChart(chartData);
+                }
+            });
+        });
+
+        function drawAmortizationChart(data) {
+            anychart.onDocumentReady(function () {
+                const chartContainer = document.getElementById('chart-container');
+                chartContainer.innerHTML = '';
+                
+                const chart = anychart.cartesian();
+                chart.title(chartTitles[currentLang].amortization);
+                chart.animation(true);
+                
+                const dataSet = anychart.data.set(data.amortizationData);
+                const principalData = dataSet.mapAs({ x: 'x', value: 'principal' });
+                const interestData = dataSet.mapAs({ x: 'x', value: 'interest' });
+                const taxData = dataSet.mapAs({ x: 'x', value: 'tax' });
+                const balanceData = dataSet.mapAs({ x: 'x', value: 'balance' });
+
+                const principalSeries = chart.column(principalData);
+                principalSeries.name(seriesNames[currentLang].principal).color(chartColors[0]);
+                
+                const interestSeries = chart.column(interestData);
+                interestSeries.name(seriesNames[currentLang].interest).color(chartColors[1]);
+                
+                const taxSeries = chart.column(taxData);
+                taxSeries.name(seriesNames[currentLang].tax).color(chartColors[2]);
+
+                chart.yScale().stackMode('value');
+
+                const balanceScale = anychart.scales.linear();
+                const balanceSeries = chart.line(balanceData);
+                balanceSeries.yScale(balanceScale);
+                balanceSeries.name(seriesNames[currentLang].balance).color(chartColors[3]).stroke(`2 ${chartColors[3]}`);
+                balanceSeries.markers(true).markers().type('circle').size(4).fill(chartColors[3]).stroke('1 #FFFFFF');
+                
+                chart.yAxis(0).title(seriesNames[currentLang].payments);
+                
+                const balanceAxis = chart.yAxis(1);
+                balanceAxis.orientation('right');
+                balanceAxis.scale(balanceScale);
+                balanceAxis.title(seriesNames[currentLang].balance);
+
+                chart.xAxis().title(seriesNames[currentLang].month);
+                chart.xAxis().labels().rotation(-45);
+                chart.xAxis().labels().padding([0, 5, 5, 5]);
+
+                chart.tooltip().format(function () {
+                    const index = this.index;
+                    const item = data.amortizationData[index];
+                    const principalText = `${seriesNames[currentLang].principal}: ₹${item.principal.toFixed(2)}`;
+                    const interestText = `${seriesNames[currentLang].interest}: ₹${item.interest.toFixed(2)}`;
+                    const taxText = `${seriesNames[currentLang].tax}: ₹${item.tax.toFixed(2)}`;
+                    const balanceText = `${seriesNames[currentLang].balance}: ₹${item.balance.toFixed(2)}`;
+
+                    return `${item.x}\n${principalText}\n${interestText}\n${taxText}\n${balanceText}`;
+                });
+                
+                chart.legend().enabled(true).position('top').itemsLayout('horizontal');
+                chart.container('chart-container');
+                chart.draw();
+            });
+        }
+
+        function drawPieChart(data) {
+            anychart.onDocumentReady(function () {
+                const chartContainer = document.getElementById('chart-container');
+                chartContainer.innerHTML = '';
+                
+                const chart = anychart.pie();
+                chart.title(chartTitles[currentLang].pie);
+                chart.animation(true);
+                
+                const pieData = [
+                    {x: seriesNames[currentLang].principal, value: data.loanAmount, fill: chartColors[0]},
+                    {x: seriesNames[currentLang].interest, value: data.totalInterest, fill: chartColors[1]},
+                    {x: seriesNames[currentLang].tax, value: data.totalTax, fill: chartColors[2]}
+                ];
+                
+                chart.data(pieData);
+                chart.labels().enabled(false);
+                chart.tooltip().format(function() {
+                    const total = data.loanAmount + data.totalInterest + data.totalTax;
+                    const percentage = ((this.value / total) * 100).toFixed(2);
+                    return `${this.name}: ₹${this.value.toFixed(2)}\n(${percentage}%)`;
+                });
+                chart.legend().enabled(true).position('right').itemsLayout('vertical');
+                chart.container('chart-container');
+                chart.draw();
+            });
+        }
+
+        function drawLineChart(data) {
+            anychart.onDocumentReady(function () {
+                const chartContainer = document.getElementById('chart-container');
+                chartContainer.innerHTML = '';
+
+                const chart = anychart.cartesian();
+                chart.title(chartTitles[currentLang].line);
+                chart.animation(true);
+                
+                const dataSet = anychart.data.set(data.amortizationData);
+                const principalData = dataSet.mapAs({ x: 'x', value: 'principal' });
+                const interestData = dataSet.mapAs({ x: 'x', value: 'interest' });
+                const taxData = dataSet.mapAs({ x: 'x', value: 'tax' });
+
+                chart.line(principalData).name(seriesNames[currentLang].principal).color(chartColors[0]);
+                chart.line(interestData).name(seriesNames[currentLang].interest).color(chartColors[1]);
+                chart.line(taxData).name(seriesNames[currentLang].tax).color(chartColors[2]);
+                
+                chart.xAxis().title(seriesNames[currentLang].month);
+                chart.yAxis().title(seriesNames[currentLang].payments);
+                chart.legend().enabled(true).position('top');
+                
+                chart.container('chart-container');
+                chart.draw();
+            });
+        }
+
+        showSection('hero-section');
+    });
+</script>
+
+</body>
+</html>
